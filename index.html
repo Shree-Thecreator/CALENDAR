@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calendar with Day Names</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0eef0;
+    }
+    .calendar {
+      width: 320px;
+      margin: 50px auto;
+      background: rgb(175, 219, 241);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .calendar h2 {
+      margin: 0;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .day-names, .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    .day-name {
+      font-weight: bold;
+      padding: 5px;
+      background: #edeff0;
+      border-radius: 5px;
+    }
+    .day {
+      padding: 10px;
+      background: #8fb2e8;
+      border-radius: 5px;
+    }
+    .today {
+      background: #8f7cd2;
+      font-weight: bold;
+      color: #000;
+      border: 2px solid #333;
+    }
+    .speak-button {
+      margin-top: 15px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background-color: #ffd966;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar">
+    <div class="nav">
+      <button onclick="changeMonth(-1)">←</button>
+      <h2 id="monthYear"></h2>
+      <button onclick="changeMonth(1)">→</button>
+    </div>
+    <div class="day-names">
+      <div class="day-name">Mon</div>
+      <div class="day-name">Tue</div>
+      <div class="day-name">Wed</div>
+      <div class="day-name">Thu</div>
+      <div class="day-name">Fri</div>
+      <div class="day-name">Sat</div>
+      <div class="day-name">Sun</div>
+    </div>
+    <div class="days" id="days"></div>
+    <button class="speak-button" onclick="speakToday()">🔊 Speak Today's Date</button>
+  </div>
+
+  <script>
+    const monthYear = document.getElementById("monthYear");
+    const daysContainer = document.getElementById("days");
+    let currentDate = new Date();
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      // Adjust so Monday = 0
+      const adjustedFirstDay = (firstDay === 0) ? 6 : firstDay - 1;
+
+      monthYear.textContent = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+      daysContainer.innerHTML = "";
+
+      const today = new Date();
+
+      for (let i = 0; i < adjustedFirstDay; i++) {
+        daysContainer.innerHTML += `<div class="day"></div>`;
+      }
+
+      for (let i = 1; i <= lastDate; i++) {
+        const isToday = (
+          year === today.getFullYear() &&
+          month === today.getMonth() &&
+          i === today.getDate()
+        );
+        const dayClass = isToday ? "day today" : "day";
+        daysContainer.innerHTML += `<div class="${dayClass}">${i}</div>`;
+      }
+    }
+
+    function changeMonth(offset) {
+      currentDate.setMonth(currentDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    function speakToday() {
+      const today = new Date();
+      const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
+      const dateText = today.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+      const message = `Today is ${dayName}, ${dateText}`;
+      const utterance = new SpeechSynthesisUtterance(message);
+      speechSynthesis.speak(utterance);
+    }
+
+    renderCalendar();
+  </script>
+</body>
+</html>
